@@ -1,32 +1,43 @@
-﻿using TpMinimalAPI;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
+using TpMinimalAPI;
+using TpMinimalAPI.Data.Models;
+using TpMinimalAPI.DTO;
+using TpMinimalAPI.Services;
+using TpMinimalAPI.Endpoint;
+using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder();
 
+builder.Services.AddAutoMapper(cfg => cfg.AddProfile<ApiMappingConfiguration>());
 
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
-builder.Services.AddSingleton<TodoServices>();
+builder.Services
+    .AddDbContext<ApiDbContext>(options => options
+    .UseSqlite(builder.Configuration
+    .GetConnectionString("sqlite")));
+
+builder.Services.AddScoped<ITodoService, EfcoreTodoService>();
+builder.Services.AddScoped<IUsers, EfcoreTodoService>();
+
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddEndpointsApiExplorer();
+
 var app = builder.Build();
 
-app.MapGet("/get", () => "hi to web API");
+await app.Services.CreateScope().ServiceProvider
+    .GetRequiredService<ApiDbContext>().Database
+    .MigrateAsync();
 
 
-app.MapGet("/Todo/activ", (TodoServices services) =>
-{
-    var todo = services;
-    if (todo is not null) return Results.Ok(services.GetAll());
-    return Results.NotFound();
-});
-
-app.MapPost("/Todo", (Todo doIt, TodoServices services) =>
-{
-    var result = services.TodoAdd(doIt.Title, doIt.DateStart, doIt.DateEnd);
-    return Results.Ok(result);
-});
-
-
-
-
-
-
+app.UseSwagger();
+app.UseSwaggerUI();
+app.MapUserEndpoint();
+app.MapTodoListEndpoint();
 
 app.Run();
