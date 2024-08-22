@@ -35,7 +35,7 @@ namespace TpMinimalAPI.Endpoint
                 .Produces(200)
                 .Produces(404);
 
-            
+
             return App;
         }
 

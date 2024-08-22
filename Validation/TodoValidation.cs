@@ -10,7 +10,5 @@ namespace TpMinimalAPI.Validation
         {
             RuleFor(x => x.Title).NotEmpty();
         }
-        
-
     }
 }
