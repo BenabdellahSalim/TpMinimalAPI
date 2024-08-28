@@ -5,7 +5,7 @@ namespace TpMinimalAPI.Data.Models
 {
     public class ApiDbContext : DbContext
     {
-       public DbSet<Todo> TodoDbset { get; set; }
+        public DbSet<Todo> TodoDbset { get; set; }
         public DbSet<Users> Users { get; set; }
 
         public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options)
@@ -16,17 +16,22 @@ namespace TpMinimalAPI.Data.Models
         {
             modelBuilder.Entity<Todo>(c =>
             {
-               c.ToTable("Todo");
-               c.Property(t => t.Title).HasMaxLength(256);
-                c.Property(t => t.DateStart).HasDefaultValue(DateTime.Now);
-                c.Property(t => t.DateEnd);
+                c.ToTable("Todo");
+                c.HasKey(t => t.Id);
+
+                c.Property(t => t.Title).HasMaxLength(256);
+                c.HasOne(o => o.Users).WithMany(u => u.Todos).HasForeignKey(u => u.UsersId);
             });
-            modelBuilder.Entity<Users>(c =>
+            modelBuilder.Entity<Users>(u =>
             {
-                c.ToTable("Users");
-                c.Property(t => t.Token).IsUnicode().HasMaxLength(6);
-                c.Property(t =>t.Name).HasMaxLength(256);
-                 
+                u.ToTable("Users");
+                u.HasKey(t => t.Id);
+
+                u.Property(t => t.Token).IsUnicode().HasMaxLength(6);
+                u.Property(t => t.Name).HasMaxLength(256);
+                u.HasMany(o => o.Todos).WithOne(o => o.Users).HasForeignKey(o => o.UsersId);
+
+                u.HasIndex(u => u.Token).IsUnique();
             });
         }
     }

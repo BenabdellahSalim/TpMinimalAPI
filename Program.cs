@@ -21,23 +21,19 @@ builder.Services
     .UseSqlite(builder.Configuration
     .GetConnectionString("sqlite")));
 
-builder.Services.AddScoped<ITodoService, EfcoreTodoService>();
-builder.Services.AddScoped<IUsers, EfcoreTodoService>();
+builder.Services.AddTodoServices(); 
+builder.Services.AddUserServices();
 
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-await app.Services.CreateScope().ServiceProvider
-    .GetRequiredService<ApiDbContext>().Database
-    .MigrateAsync();
-
-
 app.UseSwagger();
 app.UseSwaggerUI();
-app.MapUserEndpoint();
+
+app.MapGroup("/users").MapUserEndpoints();
 app.MapTodoListEndpoint();
 
 app.Run();

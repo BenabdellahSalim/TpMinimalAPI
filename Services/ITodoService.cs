@@ -5,11 +5,11 @@ namespace TpMinimalAPI.Services
 {
     public interface ITodoService
     {
-        Task<List<TodoOutPut>> GetAll();
-        Task<List<TodoOutPut>> GetActive();
-        Task<TodoOutPut?> GetById(int id);
-        Task<TodoOutPut> Add(TodoInPut todo);
-        Task<bool> Update(int id, TodoInPut todo);
-        Task<bool> Delete(int id);
+        Task<List<TodoOutPut>> GetAll( int UsersId);
+        Task<List<TodoOutPut>> GetActive(int UsersId);
+        Task<TodoOutPut?> GetById(int id, int UsersId);
+        Task<TodoOutPut> Add(TodoInPut todo, int UsersId);
+        Task<bool> Update(int id,int UsersId ,TodoInPut item);
+        Task<bool> Delete(int id, int UsersId);
     }
 }

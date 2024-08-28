@@ -9,6 +9,7 @@ namespace TpMinimalAPI.Validation
         public TodoValidation()
         {
             RuleFor(x => x.Title).NotEmpty();
+            RuleFor( p => p.DateStart).LessThan(p =>  p.DateEnd ?? DateTime.MinValue);
         }
     }
 }

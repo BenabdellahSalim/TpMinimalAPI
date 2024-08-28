@@ -8,6 +8,11 @@ namespace TpMinimalAPI.Endpoint
 {
     public static class TodoEndpoint
     {
+        public static IServiceCollection AddTodoServices(this IServiceCollection services)
+        {
+            services.AddScoped<ITodoService, EfcoreTodoService>();
+            return services;
+        }
         public static WebApplication MapTodoListEndpoint(this WebApplication App)
         {
             var groupMap = App.MapGroup("/todos").WithTags("TodosManagement");
@@ -40,60 +45,88 @@ namespace TpMinimalAPI.Endpoint
         }
 
         public static async Task<IResult> GetAllAsync(
-                [FromServices] ITodoService services)
+                [FromServices] ITodoService service,
+                [FromServices] AuthService auth,
+                 HttpContext httpContext)
         {
-            var todo = await services.GetAll();
-            return Results.Ok(todo);
+            var userId = await auth.GetUserIdFromToken(httpContext);
+            if (!userId.HasValue) return Results.Unauthorized();
+
+            return Results.Ok(await service.GetAll(userId.Value));
         }
         public static async Task<IResult> GetByIdAsync(
                 [FromRoute] int id,
-                [FromServices] ITodoService services)
+                [FromServices] ITodoService service,
+                [FromServices] AuthService auth,
+                 HttpContext httpContext)
         {
-            var todo = await services.GetById(id);
+            var userId = await auth.GetUserIdFromToken(httpContext);
+            if (!userId.HasValue) return Results.Unauthorized();
+
+            var todo = await service.GetById(id, userId.Value);
+
             if (todo is null) return Results.NotFound();
-            return Results.Ok(services.GetById(id));
+            return Results.Ok(todo);
         }
         public static async Task<IResult> GetActiveasync(
-                [FromServices] ITodoService services)
+                [FromServices] ITodoService service,
+                [FromServices] AuthService auth,
+                 HttpContext httpContext)
         {
-            var result = await services.GetActive();
-            
-            return Results.Ok(result);
+            var userId = await auth.GetUserIdFromToken(httpContext);
+            if (!userId.HasValue) return Results.Unauthorized();
+
+            return Results.Ok(await service.GetActive(userId.Value));
         }
         public static async Task<IResult> PostAsync(
                 [FromBody] TodoInPut todo,
+                [FromServices] ITodoService service,
+                [FromServices] AuthService auth,
                 [FromServices] IValidator<TodoInPut> validator,
-                [FromServices] ITodoService services)
-
+                HttpContext httpContext)
         {
-            if (!validator.Validate(todo).IsValid) return Results.BadRequest();
-            var result = await services.Add(todo);
-            return Results.Ok(result);
+            var result = validator.Validate(todo);
+            if (!result.IsValid) return Results.BadRequest(result.Errors);
+
+            var userId = await auth.GetUserIdFromToken(httpContext);
+            if (!userId.HasValue) return Results.Unauthorized();
+
+            return Results.Ok(await service.Add(todo, userId.Value));
         }
         public static async Task<IResult> DeleteAsync(
                 [FromRoute] int id,
-                [FromServices] ITodoService services)
+                [FromServices] ITodoService service,
+                [FromServices] AuthService auth,
+                HttpContext httpContext)
         {
-            var result = await services.Delete(id);
-            if (result) return Results.NoContent();
+            var userId = await auth.GetUserIdFromToken(httpContext);
+            if (!userId.HasValue) return Results.Unauthorized();
+
+            var result = await service.Delete(id, userId.Value);
+            if (result)
+            {
+                return Results.NoContent();
+            }
             return Results.NotFound();
         }
         public static async Task<IResult> UpdateAsync(
                 [FromRoute] int id,
-                [FromBody] TodoInPut todo,
-                [FromServices] ITodoService services,
-                [FromServices] IValidator<TodoInPut> validator)
+                [FromBody] TodoInPut item,
+                [FromServices] ITodoService service,
+                [FromServices] AuthService auth,
+                [FromServices] IValidator<TodoInPut> validator,
+                HttpContext httpContext)
         {
-            if (!validator.Validate(todo).IsValid)
-            {
-                return Results.BadRequest(validator.Validate(todo).Errors.Select(e => new
-                {
-                    Message = e.ErrorMessage,
-                    e.PropertyName
-                }));
-            }
-            var result = await services.Update(id, todo);
-            if (result) return Results.Ok(todo);
+            var validationResult = validator.Validate(item);
+            if (!validationResult.IsValid) return Results.BadRequest(validationResult.Errors);
+
+            if (id <= 0) return Results.BadRequest();
+
+            var userId = await auth.GetUserIdFromToken(httpContext);
+            if (!userId.HasValue) return Results.Unauthorized();
+
+            var result = await service.Update(id, userId.Value, item);
+            if (result) return Results.NoContent();
             return Results.NotFound();
         }
 
