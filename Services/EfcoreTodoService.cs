@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
+using TpMinimalAPI.Data;
 using TpMinimalAPI.Data.Models;
 using TpMinimalAPI.DTO;
 
@@ -21,6 +22,7 @@ namespace TpMinimalAPI.Services
         public async Task<TodoOutPut> Add(TodoInPut todo, int UsersId)
         {
             var dbTodo = mapper.Map<Todo>(todo);
+            dbTodo.UsersId = UsersId;
             context.TodoDbset.Add(dbTodo);
             await context.SaveChangesAsync();
 

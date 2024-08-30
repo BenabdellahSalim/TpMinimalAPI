@@ -10,13 +10,20 @@ namespace TpMinimalAPI
         {
             CreateMap<Todo, TodoOutPut>()
                .ConstructUsing(t => new
-               TodoOutPut(t.Id,
+               TodoOutPut(t.UsersId,
                t.Title,
                t.DateStart,
                t.DateEnd));
-             
+            CreateMap<Users, UsersOutPut>()
+              .ConstructUsing(t => new
+              UsersOutPut(t.Id,
+              t.Name,
+              t.Token));
+            //int Id, string Name, string Token
             CreateMap<TodoInPut, Todo>();
-             
+            CreateMap<UsersInPut, Users>();
+
         }
+       
     }
 }

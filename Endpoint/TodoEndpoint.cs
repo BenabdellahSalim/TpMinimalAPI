@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using TpMinimalAPI.Data.Models;
+using TpMinimalAPI.Data;
 using TpMinimalAPI.DTO;
 using TpMinimalAPI.Services;
 
@@ -83,6 +83,7 @@ namespace TpMinimalAPI.Endpoint
                 [FromServices] ITodoService service,
                 [FromServices] AuthService auth,
                 [FromServices] IValidator<TodoInPut> validator,
+                 [FromServices] ApiDbContext context,
                 HttpContext httpContext)
         {
             var result = validator.Validate(todo);
@@ -90,8 +91,9 @@ namespace TpMinimalAPI.Endpoint
 
             var userId = await auth.GetUserIdFromToken(httpContext);
             if (!userId.HasValue) return Results.Unauthorized();
-
-            return Results.Ok(await service.Add(todo, userId.Value));
+            //await context.SaveChangesAsync();
+            var dd = await service.Add(todo, userId.Value);
+            return Results.Ok(dd);
         }
         public static async Task<IResult> DeleteAsync(
                 [FromRoute] int id,

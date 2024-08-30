@@ -4,7 +4,7 @@ using TpMinimalAPI.DTO;
 
 namespace TpMinimalAPI.Validation
 {
-    public class UsersValidation: AbstractValidator<Users>
+    public class UsersValidation: AbstractValidator<UsersInPut>
     {
         public UsersValidation()
         {

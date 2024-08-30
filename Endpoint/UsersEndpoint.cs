@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using TpMinimalAPI.Data;
 using TpMinimalAPI.Data.Models;
 using TpMinimalAPI.DTO;
 using TpMinimalAPI.Services;
@@ -12,10 +13,7 @@ namespace TpMinimalAPI.Endpoint
     {
         private const string tokenChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-        public static IServiceCollection AddUserServices(this IServiceCollection services)
-        {
-            return services;
-        }
+        public static IServiceCollection AddUserServices(this IServiceCollection services) => services;
 
         public static RouteGroupBuilder MapUserEndpoints(this RouteGroupBuilder builder)
         {
@@ -34,8 +32,8 @@ namespace TpMinimalAPI.Endpoint
             var result = validator.Validate(model);
             if (!result.IsValid) return Results.BadRequest(result.Errors);
 
-            var sb = new StringBuilder(16);
-            for (int i = 0; i < 16; i++)
+            var sb = new StringBuilder(6);
+            for (int i = 0; i < 6; i++)
             {
                 sb.Append(tokenChars[Random.Shared.Next(0, tokenChars.Length)]);
             }

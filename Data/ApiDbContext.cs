@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TpMinimalAPI.Data.Models;
 
 
-namespace TpMinimalAPI.Data.Models
+namespace TpMinimalAPI.Data
 {
     public class ApiDbContext : DbContext
     {
@@ -33,6 +34,12 @@ namespace TpMinimalAPI.Data.Models
 
                 u.HasIndex(u => u.Token).IsUnique();
             });
+
         }
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    optionsBuilder.UseSqlite("filename=api.db");
+
+        //}
     }
 }

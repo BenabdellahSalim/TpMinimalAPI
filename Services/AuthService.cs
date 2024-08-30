@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TpMinimalAPI.Data.Models;
+using TpMinimalAPI.Data;
 
 namespace TpMinimalAPI.Services
 {
